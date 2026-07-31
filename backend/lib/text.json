@@ -1,0 +1,20 @@
+{
+    "studyingDaySeries": [
+        {
+            "_id": "Saturday, July 25, 2026",
+            "totalStudyHour": 22
+        },
+        {
+            "_id": "Thursday, July 23, 2026",
+            "totalStudyHour": 8
+        },
+        {
+            "_id": "Tuesday, July 21, 2026",
+            "totalStudyHour": 12.5
+        },
+        {
+            "_id": "Wednesday, July 22, 2026",
+            "totalStudyHour": 40
+        }
+    ]
+}
