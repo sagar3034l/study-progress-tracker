@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { Link, useLocation } from 'react-router'
-import { ArrowRightIcon, EyeDashedIcon, GraduationCap, PlusIcon, SparklesIcon, TrendingUp } from 'lucide-react'
+import { ArrowRightIcon, SparklesIcon, TrendingUp } from 'lucide-react'
 import { userContext } from '../context/UseContext'
 import { LogOutIcon } from 'lucide-react'
 
@@ -10,7 +10,7 @@ const Header = () => {
 
    const { Logout} = useContext(userContext)
 
-   async function handleLogout(e) {
+   async function handleLogout() {
        await Logout()  
    }
    

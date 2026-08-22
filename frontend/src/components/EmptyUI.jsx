@@ -1,5 +1,3 @@
-import {WrapTextIcon} from 'lucide-react'
-
 const EmptyUI = () => {
   return (
     <div>

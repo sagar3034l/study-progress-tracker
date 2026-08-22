@@ -1,7 +1,7 @@
 import Card from '../components/Card';
 import { userContext } from '../context/UseContext'
 import { useContext, useEffect, useState } from 'react'
-import { Loader2Icon, PlusIcon, Search, SearchCheckIcon } from 'lucide-react'
+import { Loader2Icon, PlusIcon, Search } from 'lucide-react'
 import Header from '../components/Header'
 
 
@@ -11,21 +11,6 @@ const StudyPlanPage = () => {
   const [time, setTime] = useState(undefined)
   const [role, setRole] = useState(undefined)
   const [search, setSearch] = useState("")
-
-  if (loading) {
-    return <Loader2Icon className='size-5 animate-spin fixed' />
-  }
-
-
-  async function handleAddSubject(e) {
-    e.preventDefault();
-    await generateStudyPlan({ subject, targetHours: time })
-    setSubject(null);
-    setTime(null)
-    setModalOpen(false);
-  }
-
-  const filteredData = schedule?.Plans?.filter((el) => el.subject.toLowerCase().includes(search.toLowerCase()));
 
   useEffect(() => {
     if (!modalOpen) {
@@ -47,6 +32,24 @@ const StudyPlanPage = () => {
       body.style.paddingRight = previousPaddingRight;
     };
   }, [modalOpen])
+
+  if (loading) {
+    return <Loader2Icon className='size-5 animate-spin fixed' />
+  }
+
+  async function handleAddSubject(e) {
+    e.preventDefault();
+    try {
+      await generateStudyPlan({ subject, targetHours: time })
+      setSubject("");
+      setTime("")
+      setModalOpen(false);
+    } catch {
+      alert("Could not create the study plan. Please try again.")
+    }
+  }
+
+  const filteredData = schedule?.Plans?.filter((el) => el.subject.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div>

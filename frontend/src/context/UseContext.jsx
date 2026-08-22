@@ -1,11 +1,12 @@
-import { createContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 
 import useUser from '../hooks/useUser';
 import useStudyHook from '../hooks/useStudyHook';
-import { Navigate, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import useStudyProgress from '../hooks/useStudyProgress';
 
 
+// eslint-disable-next-line react-refresh/only-export-components -- this context is shared app-wide
 export const userContext = createContext(null);
 const UseContext = ({ children }) => {
 
@@ -28,7 +29,7 @@ const UseContext = ({ children }) => {
 
 
 
-    async function signinUser({ userName, email, password }) {
+    const signinUser = useCallback(async ({ userName, email, password }) => {
         try {
             isLoading(true)
             const data = await userSignin({ name: userName, email, password })
@@ -37,12 +38,13 @@ const UseContext = ({ children }) => {
             isSignedIn(true)
         } catch (error) {
             console.log(error)
+            throw error
         } finally {
             isLoading(false)
         }
-    }
+    }, [userSignin])
 
-    async function login({ email, password }) {
+    const login = useCallback(async ({ email, password }) => {
         try {
             isLoading(true)
             const data = await userLogin({ email, password })
@@ -51,17 +53,18 @@ const UseContext = ({ children }) => {
             isSignedIn(true)
         } catch (error) {
             console.log(error)
+            throw error
         } finally {
             isLoading(false)
         }
-    }
+    }, [userLogin])
 
-    async function Logout() {
+    const Logout = useCallback(async () => {
         await userLogout();
         setCurrentUser(null)
         isSignedIn(false)
         setUser(null)
-    }
+    }, [userLogout])
 
 
 
@@ -72,7 +75,7 @@ const UseContext = ({ children }) => {
                 await getMe().then((res) => {
                     setCurrentUser(res.data)
                     isLoading(false)
-                }).catch((e) => {
+                }).catch(() => {
                     navigate("/")
                     isLoading(false)
                 })
@@ -81,7 +84,7 @@ const UseContext = ({ children }) => {
         } catch (error) {
             console.error(error)
         }
-    }, [])
+    }, [getMe, navigate])
 
     useEffect(() => {
         try {
@@ -95,7 +98,7 @@ const UseContext = ({ children }) => {
         } catch (error) {
             console.error(error)
         }
-    }, [])
+    }, [getDataForChart])
 
     useEffect(() => {
         async function getAllShedule() {
@@ -112,7 +115,7 @@ const UseContext = ({ children }) => {
             }
         }
         getAllShedule()
-    }, [user, signin, currentUser, currentPlan]);
+    }, [getAllSchedules, currentUser, currentPlan, signin, user]);
 
     useEffect(() => {
         const response = async () => {
@@ -124,9 +127,9 @@ const UseContext = ({ children }) => {
 
         response().catch(console.error)
 
-    }, [])
+    }, [getAllLogs])
 
-    async function generateStudyPlan({ subject, targetHours }) {
+    const generateStudyPlan = useCallback(async ({ subject, targetHours }) => {
         try {
             isLoading(true)
             const data = await makeShedule({ subject, targetHours })
@@ -137,12 +140,13 @@ const UseContext = ({ children }) => {
             if (error.status === "401") {
                 navigate("/")
             }
+            throw error
         } finally {
             isLoading(false)
         }
-    }
+    }, [makeShedule, navigate])
 
-    async function generateLogs({ topic, time, timeUnit }, id) {
+    const generateLogs = useCallback(async ({ topic, time, timeUnit }, id) => {
         try {
             const res = await makeStudyProgressLog({ topic, studyTime: time, timeUnit }, id);
             return res
@@ -150,12 +154,12 @@ const UseContext = ({ children }) => {
             console.error(error)
             throw error
         }
-    }
+    }, [makeStudyProgressLog])
 
     const contextValue = useMemo(() => ({
         chartData, logs, signinUser, login, Logout, signin, loading, user,
         schedule, currentUser, modalOpen, setModalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor
-    }), [chartData, logs, signin, loading, user, schedule, currentUser, modalOpen, analyzeStudyMentor]);
+    }), [chartData, logs, signinUser, login, Logout, signin, loading, user, schedule, currentUser, modalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor]);
 
 
     return (

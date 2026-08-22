@@ -1,7 +1,5 @@
 import { ArrowRightIcon } from 'lucide-react'
-import React from 'react'
 import { Link } from 'react-router'
-import {SocialIcon} from 'react-social-icons'
 import Headers from '../components/Header'
 
 

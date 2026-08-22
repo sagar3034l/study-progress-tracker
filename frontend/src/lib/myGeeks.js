@@ -1,4 +1,4 @@
-function myGeeks() {
+export default function myGeeks() {
 
     // Input string
     let str = "34 minutes";

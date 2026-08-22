@@ -1,9 +1,4 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
-import { useRef } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 import HomePage from './pages/HomePage'
 import StudyPlanPage from './pages/StudyPlanPage'
@@ -17,7 +12,6 @@ import DailyStudyLogs from './pages/DailyStudyLogs'
 
 function App() {
   const {currentUser,loading} = useContext(userContext)
-  Boolean(currentUser)
 
   if(loading){
    return (

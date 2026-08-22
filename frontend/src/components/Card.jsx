@@ -3,7 +3,7 @@ import { Progress, VStack } from 'rsuite';
 import 'rsuite/dist/rsuite-no-reset.css';
 import { useContext } from 'react';
 import { userContext } from '../context/UseContext';
-import { BadgeCheck, BookOpenText, Clock3, Sparkle, Sparkles, Tag, X } from 'lucide-react';
+import { BadgeCheck, BookOpenText, Clock3, Sparkles, Tag, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 const Card = (s) => {
