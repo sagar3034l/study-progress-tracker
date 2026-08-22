@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv'
 import { connectDB } from './db/db.js';
 import cookieParser from 'cookie-parser'
@@ -18,11 +17,6 @@ app.use(cookieParser())
 const PORT = process.env.PORT || 3000
 
 const __dirname = path.resolve();
-
-app.use(cors({
-     origin: process.env.FRONTEND_URL,
-     credentials: true
-}))
 
 app.use(express.json());
 
