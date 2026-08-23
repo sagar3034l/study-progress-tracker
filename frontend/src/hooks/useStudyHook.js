@@ -17,7 +17,6 @@ const useStudyHook = () => {
             const res = await api.post("/study",{
                 subject,targetHours,...(role && { role }) 
             })
-            console.log(res.data)
             return res.data;
          } catch (error) {
             console.error(error)

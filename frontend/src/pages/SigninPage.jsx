@@ -7,8 +7,9 @@ const SigninPage = () => {
   const [userName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const { signinUser, loading } = useContext(userContext)
+  const { signinUser } = useContext(userContext)
 
   const navigate = useNavigate()
 
@@ -19,10 +20,13 @@ const SigninPage = () => {
     }
 
     try {
+      setSubmitting(true)
       await signinUser({ userName, email, password })
       navigate("/study")
     } catch {
       alert("Sign up failed. Please try again.")
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -44,9 +48,9 @@ const SigninPage = () => {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder='Enter your password' className='p-2 rounded-md outline-none shadow-xl border-blue-700 focus:ring-2 focus:ring-orange-800' />
           </div>
 
-          <button disabled={loading} type='submit' className='bg-red-400 w-full rounded-lg py-2 mt-4 mx-auto cursor-pointer'>
+          <button disabled={submitting} type='submit' className='bg-red-400 w-full rounded-lg py-2 mt-4 mx-auto cursor-pointer'>
             {
-              loading ? (
+              submitting ? (
                 <div className='flex justify-center'>
                   <Loader2Icon className='size-4 animate-spin transition-all' />
                 </div>

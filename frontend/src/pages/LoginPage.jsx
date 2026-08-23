@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router'
 const LoginPage = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const { loading, login } = useContext(userContext)
+  const { login } = useContext(userContext)
 
   const navigate = useNavigate()
 
@@ -18,10 +19,13 @@ const LoginPage = () => {
     }
 
     try {
+      setSubmitting(true)
       await login({ email, password })
       navigate("/study")
     } catch {
       alert("Login failed. Please check your credentials and try again.")
+    } finally {
+      setSubmitting(false)
     }
   }
   return (
@@ -38,9 +42,9 @@ const LoginPage = () => {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder='Enter your password' className='p-2 rounded-md outline-none shadow-xl border-blue-700 focus:ring-2 focus:ring-orange-800' />
           </div>
 
-          <button disabled={loading} type='submit' className='bg-red-400 w-full rounded-lg py-2 mt-4 mx-auto cursor-pointer'>
+          <button disabled={submitting} type='submit' className='bg-red-400 w-full rounded-lg py-2 mt-4 mx-auto cursor-pointer'>
             {
-              loading ? (
+              submitting ? (
                 <div className='flex justify-center'>
                   <Loader2Icon className='size-4 animate-spin transition-all' />
                 </div>

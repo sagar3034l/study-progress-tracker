@@ -17,6 +17,7 @@ const UseContext = ({ children }) => {
 
 
     const [loading, isLoading] = useState(false);
+    const [authReady, setAuthReady] = useState(false);
     const [user, setUser] = useState(null);
     const [signin, isSignedIn] = useState(false);
     const [schedule, setScehdule] = useState(null)
@@ -24,7 +25,10 @@ const UseContext = ({ children }) => {
     const [currentPlan, setCurrentPlan] = useState(null)
     const [logs, setLogs] = useState([])
     const [modalOpen, setModalOpen] = useState(false);
-    const [chartData, setChartData] = useState([])
+    const [chartData, setChartData] = useState([]);
+    const [sheduleLoad,setSheduleLoad] = useState(false);
+    const [getSheduleLoad,setGetSheduleLoad] = useState(false);
+
     const navigate = useNavigate()
 
 
@@ -69,24 +73,28 @@ const UseContext = ({ children }) => {
 
 
     useEffect(() => {
-        try {
-            const getCurrentUser = async () => {
+        const getCurrentUser = async () => {
+            try {
                 isLoading(true)
-                await getMe().then((res) => {
-                    setCurrentUser(res.data)
-                    isLoading(false)
-                }).catch(() => {
-                    navigate("/")
-                    isLoading(false)
-                })
+                const res = await getMe()
+                setCurrentUser(res.data)
+            } catch (error) {
+                setCurrentUser(null)
+                console.error(error)
+            } finally {
+                isLoading(false)
+                setAuthReady(true)
             }
-            getCurrentUser()
-        } catch (error) {
-            console.error(error)
         }
-    }, [getMe, navigate])
+
+        getCurrentUser()
+    }, [getMe])
 
     useEffect(() => {
+        if (!currentUser) {
+            return;
+        }
+
         try {
             const getChartData = async () => {
                 isLoading(true);
@@ -98,12 +106,16 @@ const UseContext = ({ children }) => {
         } catch (error) {
             console.error(error)
         }
-    }, [getDataForChart])
+    }, [getDataForChart, currentUser])
 
     useEffect(() => {
+        if (!currentUser) {
+            return;
+        }
+
         async function getAllShedule() {
             try {
-                isLoading(true)
+                setGetSheduleLoad(true)
                 const data = await getAllSchedules()
                 setScehdule(data)
                 isLoading(false)
@@ -111,13 +123,17 @@ const UseContext = ({ children }) => {
                 console.error(error)
                 isLoading(false)
             } finally {
-                isLoading(false)
+                setGetSheduleLoad(false)
             }
         }
         getAllShedule()
     }, [getAllSchedules, currentUser, currentPlan, signin, user]);
 
     useEffect(() => {
+        if (!currentUser) {
+            return;
+        }
+
         const response = async () => {
             isLoading(true)
             const data = await getAllLogs();
@@ -127,11 +143,11 @@ const UseContext = ({ children }) => {
 
         response().catch(console.error)
 
-    }, [getAllLogs])
+    }, [getAllLogs, currentUser])
 
     const generateStudyPlan = useCallback(async ({ subject, targetHours }) => {
         try {
-            isLoading(true)
+            setSheduleLoad(true)
             const data = await makeShedule({ subject, targetHours })
             setCurrentPlan(data)
             return data;
@@ -142,7 +158,7 @@ const UseContext = ({ children }) => {
             }
             throw error
         } finally {
-            isLoading(false)
+            setSheduleLoad(false)
         }
     }, [makeShedule, navigate])
 
@@ -157,9 +173,9 @@ const UseContext = ({ children }) => {
     }, [makeStudyProgressLog])
 
     const contextValue = useMemo(() => ({
-        chartData, logs, signinUser, login, Logout, signin, loading, user,
+        chartData, sheduleLoad, getSheduleLoad, logs, signinUser, login, Logout, signin, loading, authReady, user,
         schedule, currentUser, modalOpen, setModalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor
-    }), [chartData, logs, signinUser, login, Logout, signin, loading, user, schedule, currentUser, modalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor]);
+    }), [chartData, logs, signinUser, login, Logout, signin, loading, authReady, user, schedule, currentUser, modalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor]);
 
 
     return (

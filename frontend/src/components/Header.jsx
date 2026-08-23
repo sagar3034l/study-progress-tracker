@@ -26,16 +26,18 @@ const Header = () => {
             !isInStudyPage ? (
                <>
          <div className='flex items-center justify-between gap-2'>
-            <Link to={"/login"}>
-               <button className='border-slate-300 mr-1 p-1 cursor-pointer'>
-                  login
-               </button>
+            <Link
+               to={"/login"}
+               className='mr-1 inline-flex items-center rounded-md px-2 py-1 text-white hover:bg-white/10'
+            >
+               login
             </Link>
-            <Link to={"/signin"}>
-               <button className='bg-blue-500 flex justify-center p-1 rounded-lg items-center gap-1 hover:bg-blue-600 group'>
-                  <h1 className='text-white p-1 cursor-pointer '>Get started</h1>
-                  <ArrowRightIcon className='size-4 mt-1 group-hover:translate-x-0.5' />
-               </button>
+            <Link
+               to={"/signin"}
+               className='inline-flex items-center gap-1 rounded-lg bg-blue-500 px-2 py-1 hover:bg-blue-600 group'
+            >
+               <span className='text-white'>Get started</span>
+               <ArrowRightIcon className='size-4 mt-0.5 transition-transform group-hover:translate-x-0.5' />
             </Link>
          </div>
                </>

@@ -127,6 +127,8 @@ export async function getDataForStudyChart(req, res) {
             return;
         }
 
+        const userId = user._id
+
         const result = await studyProgress.aggregate([
             {
                 $group: {
@@ -135,6 +137,7 @@ export async function getDataForStudyChart(req, res) {
                             format: "%Y-%m-%d",
                             date: "$createdAt",
                         },
+                        user: userId
                     },
                     totalStudyHour: {
                         $sum: "$studyTime",

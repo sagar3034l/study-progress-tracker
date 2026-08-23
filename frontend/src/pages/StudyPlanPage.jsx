@@ -1,16 +1,18 @@
 import Card from '../components/Card';
 import { userContext } from '../context/UseContext'
 import { useContext, useEffect, useState } from 'react'
-import { Loader2Icon, PlusIcon, Search } from 'lucide-react'
+import { Loader2Icon, LoaderCircleIcon, PlusIcon, Search } from 'lucide-react'
 import Header from '../components/Header'
+import PlanList from '../components/PlanList';
 
 
 const StudyPlanPage = () => {
-  const { schedule, modalOpen, setModalOpen, generateStudyPlan, loading } = useContext(userContext);
+  const {schedule, modalOpen, setModalOpen, generateStudyPlan, loading, getSheduleLoad } = useContext(userContext);
   const [subject, setSubject] = useState("")
   const [time, setTime] = useState(undefined)
   const [role, setRole] = useState(undefined)
   const [search, setSearch] = useState("")
+  const [sheduleLoad,setSheduleLoad] = useState(false);
 
   useEffect(() => {
     if (!modalOpen) {
@@ -33,19 +35,18 @@ const StudyPlanPage = () => {
     };
   }, [modalOpen])
 
-  if (loading) {
-    return <Loader2Icon className='size-5 animate-spin fixed' />
-  }
-
   async function handleAddSubject(e) {
     e.preventDefault();
     try {
+      setSheduleLoad(true)
       await generateStudyPlan({ subject, targetHours: time })
       setSubject("");
       setTime("")
       setModalOpen(false);
     } catch {
       alert("Could not create the study plan. Please try again.")
+    }finally{
+      setSheduleLoad(false)
     }
   }
 
@@ -89,8 +90,12 @@ const StudyPlanPage = () => {
                   <option value="admin">Admin</option>
                 </select>
                 <div className='flex items-center gap-2.5 mt-5 absolute right-10 bottom-0 top-full'>
-                  <button type='submit' className='bg-blue-500 p-1.5 px-3 rounded-xl'
-                  >Add
+                  <button type="submit" className={`p-1.5 px-3 rounded-xl ${sheduleLoad ? "bg-blue-300" : "bg-blue-500"}`}
+                    disabled={sheduleLoad}
+                  >
+                    {
+                      sheduleLoad ? "Adding...." : "Add"
+                    }
                   </button>
                   <button
                     type='button'
@@ -105,20 +110,8 @@ const StudyPlanPage = () => {
           </div>
         )
       }
-
-      {
-        schedule && schedule.Plans?.length > 0 && (
-          <div className='p-4 mb-4'>
-            {
-              filteredData.map((s) => (
-                <Card key={s._id} {...s} />
-              ))
-            }
-          </div>
-        )
-      }
       <div>
-
+         <PlanList sheduleLoad={getSheduleLoad} data={filteredData} schedule={schedule} />
       </div>
     </div>
   )

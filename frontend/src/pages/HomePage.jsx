@@ -15,16 +15,18 @@ const HomePage = () => {
         
          {/* CTA buttons */}
         <div className='flex items-center mt-10 gap-3'>
-          <Link to={"/login"}>
-            <button className='border-2 text-white border-slate-300 mr-1 p-1 px-2 rounded-xl hover:bg-blue-400 cursor-pointer'>
-              Login
-            </button>
+          <Link
+            to={"/login"}
+            className='border-2 text-white border-slate-300 mr-1 inline-flex items-center rounded-xl px-2 py-1 hover:bg-blue-400'
+          >
+            Login
           </Link>
-          <Link to={"/signin"}>
-            <button className='bg-blue-500 flex justify-center p-1 rounded-lg items-center gap-1 hover:bg-blue-600 group'>
-              <h1 className='text-white p-1 cursor-pointer '>Get started</h1>
-              <ArrowRightIcon className='size-4 mt-1 group-hover:translate-x-0.5' />
-            </button>
+          <Link
+            to={"/signin"}
+            className='bg-blue-500 inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-blue-600 group'
+          >
+            <span className='text-white'>Get started</span>
+            <ArrowRightIcon className='size-4 mt-0.5 transition-transform group-hover:translate-x-0.5' />
           </Link>
         </div>
 

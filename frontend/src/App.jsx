@@ -8,28 +8,30 @@ import LoginPage from './pages/LoginPage'
 import SigninPage from './pages/SigninPage'
 import { LoaderIcon } from 'lucide-react'
 import DailyStudyLogs from './pages/DailyStudyLogs'
+import { useLocation } from 'react-router'
 
 
 function App() {
-  const {currentUser,loading} = useContext(userContext)
+  const { currentUser, authReady,loading } = useContext(userContext)
+  const location = useLocation()
+  const protectedRoute = location.pathname === '/study' || location.pathname === '/studychart'
 
-  if(loading){
-   return (
-      <LoaderIcon className='animate-spin size-10' />
-   )
+  if (protectedRoute && !authReady) {
+    return <LoaderIcon className='animate-spin text-center relative top-[260px] left-[620px] size-24 text-amber-400' />
   }
+
   return (
      <div>
-       {/* <Headers /> */}
         <Routes>
+           <Route path='/login' element={<LoginPage />}/>
+           <Route path='/signin' element={<SigninPage />}/>
            <Route path='/' element={currentUser ? <Navigate to="/study" replace /> : <HomePage />}  />
            <Route path='/study' element={currentUser ? <StudyPlanPage /> : <Navigate to="/" replace />}  />
            <Route path='/studychart' element = {<DailyStudyLogs />} />
-           <Route path='/login' element={<LoginPage />}/>
-           <Route path='/signin' element={<SigninPage />}/>
         </Routes>
      </div>
   )
 }
+
 
 export default App
