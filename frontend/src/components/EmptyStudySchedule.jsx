@@ -1,6 +1,9 @@
 import { BookOpenCheckIcon, CalendarClock, Plus } from "lucide-react";
+import { useContext } from "react";
+import { userContext } from "../context/UseContext";
 
 export default function EmptyStudySchedule({ onCreate = () => {} }) {
+  const {modalOpen,setModalOpen} = useContext(userContext);
   return (
     <div className="flex items-center justify-center min-h-[420px] w-full px-4">
       <div className="w-full max-w-sm rounded-2xl px-8 py-10 text-center shadow-sm">
@@ -16,7 +19,7 @@ export default function EmptyStudySchedule({ onCreate = () => {} }) {
         </p>
 
         <button
-          onClick={onCreate}
+          onClick={()=>setModalOpen(true)}
           className="mt-6 cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
