@@ -76,7 +76,7 @@ export async function createProgressController(req, res) {
             return;
         }
         await studyProgress.create({
-            subject: id, topic: topicList, studyTime, createdDay
+            user: user._id ,subject: id, topic: topicList, studyTime, createdDay
         })
 
         res.json({
@@ -109,7 +109,7 @@ export async function getSubjectLogs(req, res) {
                 dailyStudyLogs.push(item)
             }
         })
-    
+
         res.json({
             dailyStudyLogs
         })
@@ -122,6 +122,7 @@ export async function getSubjectLogs(req, res) {
 export async function getDataForStudyChart(req, res) {
     try {
         const user = req.user;
+        
         if (!user) {
             res.status(401).json({ error: "Unauthorized" });
             return;
@@ -131,13 +132,17 @@ export async function getDataForStudyChart(req, res) {
 
         const result = await studyProgress.aggregate([
             {
+                $match:{
+                    user:userId
+                }
+            },
+            {
                 $group: {
                     _id: {
                         $dateToString: {
                             format: "%Y-%m-%d",
                             date: "$createdAt",
                         },
-                        user: userId
                     },
                     totalStudyHour: {
                         $sum: "$studyTime",

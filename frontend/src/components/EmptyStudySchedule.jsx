@@ -17,12 +17,12 @@ export default function EmptyStudySchedule({ onCreate = () => {} }) {
         <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
           Block out your study sessions and they'll show up here, organized by day.
         </p>
-
+  
         <button
           onClick={()=>setModalOpen(true)}
           className="mt-6 cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
         >
-          <Plus className="h-4 w-4" strokeWidth={2} />
+          <Plus className="h-4 w-4" strokeWidth={2} fontVariant="" />
           Create a schedule
         </button>
       </div>

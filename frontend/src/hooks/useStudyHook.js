@@ -26,7 +26,7 @@ const useStudyHook = () => {
     const getDataForChart = useCallback(async function getDataForChart() {
         try {
             const res = await api.get("subject/chart-data")
-            console.log(res.data)
+            console.log("study chart data",res.data)
             return res.data
         } catch (error) {
             console.error(error)
