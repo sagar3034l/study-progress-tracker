@@ -58,15 +58,36 @@ const useStudyHook = () => {
             throw error;
         }
     }, [])
+
+    const updateStudyPlan = useCallback(async function updateStudyPlan(id, payload) {
+        try {
+            const res = await api.put(`/study/${id}`, payload)
+            return res.data;
+        } catch (error) {
+            console.error(error)
+            throw error;
+        }
+    }, [])
+
+    const deleteStudyPlan = useCallback(async function deleteStudyPlan(id) {
+        try {
+            const res = await api.delete(`/study/${id}`)
+            return res.data;
+        } catch (error) {
+            console.error(error)
+            throw error;
+        }
+    }, [])
     return {
         getAllSchedules,
         makeShedule,
         makeStudyProgressLog,
         getDataForChart,
-        analyzeStudyMentor
+        analyzeStudyMentor,
+        updateStudyPlan,
+        deleteStudyPlan
     }
 }
 
 export default useStudyHook
-
 

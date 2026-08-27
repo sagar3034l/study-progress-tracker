@@ -12,7 +12,7 @@ const UseContext = ({ children }) => {
 
     const { userSignin, userLogin, userLogout, getMe } = useUser()
 
-    const { getAllSchedules, makeShedule, makeStudyProgressLog, getDataForChart, analyzeStudyMentor } = useStudyHook();
+    const { getAllSchedules, makeShedule, makeStudyProgressLog, getDataForChart, analyzeStudyMentor, updateStudyPlan, deleteStudyPlan } = useStudyHook();
     const { getAllLogs } = useStudyProgress();
 
 
@@ -165,6 +165,7 @@ const UseContext = ({ children }) => {
     const generateLogs = useCallback(async ({ topic, time, timeUnit }, id) => {
         try {
             const res = await makeStudyProgressLog({ topic, studyTime: time, timeUnit }, id);
+            refreshSchedule()
             return res
         } catch (error) {
             console.error(error)
@@ -172,10 +173,37 @@ const UseContext = ({ children }) => {
         }
     }, [makeStudyProgressLog])
 
+    const refreshSchedule = useCallback(() => {
+        setCurrentPlan({ refreshedAt: Date.now() })
+    }, [])
+
+    const editStudyPlan = useCallback(async (id, payload) => {
+        try {
+            const res = await updateStudyPlan(id, payload)
+            refreshSchedule()
+            return res
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }, [refreshSchedule, updateStudyPlan])
+
+    const removeStudyPlan = useCallback(async (id) => {
+        try {
+            const res = await deleteStudyPlan(id)
+            refreshSchedule()
+            return res
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
+    }, [deleteStudyPlan, refreshSchedule])
+
     const contextValue = useMemo(() => ({
         chartData, sheduleLoad, getSheduleLoad, logs, signinUser, login, Logout, signin, loading, authReady, user,
-        schedule, currentUser, modalOpen, setModalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor
-    }), [chartData, logs, signinUser, login, Logout, signin, loading, authReady, user, schedule, currentUser, modalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor]);
+        schedule, currentUser, modalOpen, setModalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor,
+        editStudyPlan, removeStudyPlan, refreshSchedule
+    }), [chartData, logs, signinUser, login, Logout, signin, loading, authReady, user, schedule, currentUser, modalOpen, generateStudyPlan, generateLogs, analyzeStudyMentor, editStudyPlan, removeStudyPlan, refreshSchedule]);
 
 
     return (

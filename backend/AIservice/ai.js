@@ -20,4 +20,4 @@ export function getGroqClient() {
   return groqClient;
 }
 
-export const groqModel = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
+export const groqModel = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';

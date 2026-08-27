@@ -45,7 +45,7 @@ export async function createProgressController(req, res) {
             }
         };
 
-        const result = await StudyModel.findByIdAndUpdate(id, update, { returnDocument: true })
+        const result = await StudyModel.findByIdAndUpdate(id, update, { returnDocument: "after" })
 
         const currentDate = new Date(Date.now());
 
@@ -100,11 +100,15 @@ export async function getSubjectLogs(req, res) {
             return;
         }
 
-        let dailyStudyLogs = [];
+        const dailyStudyLogs = [];
 
         const AllStudyLogs = await studyProgress.find().populate("subject", "plannedBy subject");
 
-        AllStudyLogs.map((item) => {
+        AllStudyLogs.forEach((item) => {
+            if (!item.subject || !item.subject.plannedBy) {
+                return;
+            }
+
             if (item.subject.plannedBy.toString() === user._id.toString()) {
                 dailyStudyLogs.push(item)
             }

@@ -3,12 +3,12 @@ import { Progress, VStack } from 'rsuite';
 import 'rsuite/dist/rsuite-no-reset.css';
 import { useContext } from 'react';
 import { userContext } from '../context/UseContext';
-import { BadgeCheck, BookOpenText, Clock3, Sparkles, Tag, X } from 'lucide-react';
+import { BadgeCheck, BookOpenText, Clock3, Delete, DeleteIcon, Edit2Icon, EditIcon, Sparkles, Tag, Trash2Icon, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 const Card = (s) => {
 
-  const {generateLogs} = useContext(userContext)
+  const {generateLogs, editStudyPlan, removeStudyPlan} = useContext(userContext)
 
   const [modalOpen, setModalOpen] = useState(false);
   const [time, setTime] = useState(0)
@@ -16,8 +16,13 @@ const Card = (s) => {
   const [timeUnit,setTimeUnit] = useState("Hours")
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [editSubject, setEditSubject] = useState(s.subject || "")
+  const [editTargetHours, setEditTargetHours] = useState(s.targetHours || "")
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false)
+  const [editError, setEditError] = useState("")
   const createdDate = s.createdAt
   const DateInString = createdDate.split("T")[0]
+  const [editModalOpen,setEditModalOpen] = useState(false)
 
   const date = new Date(DateInString)
   const options = {
@@ -29,11 +34,22 @@ const Card = (s) => {
 
   const actualDate = date.toLocaleString("en-US", options)
   const modalRoot = typeof document !== "undefined" ? document.body : null;
+  const isAnyModalOpen = modalOpen || editModalOpen;
 
   const topicList = topic
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+
+  useEffect(() => {
+    if (!editModalOpen) {
+      return;
+    }
+
+    setEditSubject(s.subject || "")
+    setEditTargetHours(s.targetHours || "")
+    setEditError("")
+  }, [editModalOpen, s.subject, s.targetHours])
 
   function closeModal() {
     setModalOpen(false)
@@ -43,13 +59,25 @@ const Card = (s) => {
     setSubmitError("");
   }
 
+  function closeEditModal() {
+    setEditModalOpen(false)
+    setEditSubject(s.subject || "")
+    setEditTargetHours(s.targetHours || "")
+    setEditError("")
+  }
+
   useEffect(() => {
-    if (!modalOpen) {
+    if (!isAnyModalOpen) {
       return;
     }
 
     const handleEscape = (event) => {
       if (event.key === "Escape") {
+        if (editModalOpen) {
+          closeEditModal();
+          return;
+        }
+
         closeModal();
       }
     };
@@ -71,7 +99,7 @@ const Card = (s) => {
       body.style.paddingRight = previousPaddingRight;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [modalOpen])
+  }, [modalOpen, editModalOpen])
 
   async function handleAddStudyTime(e) {
     e.preventDefault();
@@ -91,18 +119,73 @@ const Card = (s) => {
     }
   }
 
+  async function handleEditStudyPlan(e) {
+    e.preventDefault();
+    if (!editSubject.trim() || Number(editTargetHours) <= 0) {
+      return;
+    }
+
+    try {
+      setEditError("");
+      setIsEditSubmitting(true);
+      await editStudyPlan(s._id, {
+        subject: editSubject.trim(),
+        targetHours: Number(editTargetHours),
+      });
+      closeEditModal();
+    } catch (error) {
+      console.error(error);
+      setEditError("We could not update this plan. Please try again.");
+    } finally {
+      setIsEditSubmitting(false);
+    }
+  }
+
+  async function handleDeleteStudyPlan() {
+    const shouldDelete = window.confirm(`Delete the study plan for ${s.subject}?`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      await removeStudyPlan(s._id);
+    } catch (error) {
+      console.error(error);
+      alert("We could not delete this plan. Please try again.");
+    }
+  }
+
   const percentage = (s.progressTillNow/s.targetHours)*100;
 
   let remainingHours = s.targetHours-s.progressTillNow
 
   return (
     <div className='w-full rounded-2xl border border-white/10 bg-slate-900/70 p-3 mt-2 mb-3 shadow-lg transition hover:-translate-y-0.5 hover:border-amber-400/20 hover:bg-slate-900/90'>
+      
       <div className='flex w-full items-start justify-between gap-3'>
-        <div className='inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-xs text-amber-200'>
+        <div className='flex gap-2'>
+          <div className='inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-1 text-xs text-amber-200'>
           <Sparkles className='size-3.5' />
           <span>Study card</span>
         </div>
-        <h1 className='text-xs text-white/45'>Created on {actualDate}</h1>
+        <h1 className='text-xs text-white/50 mt-1'>Created on {actualDate}</h1>
+        </div>
+       <div className='flex gap-3'>
+         <button
+          type='button'
+          onClick={() => setEditModalOpen(true)}
+          className='cursor-pointer'
+         >
+          <EditIcon className='size-6 text-green-400' />
+        </button>
+        <button
+          type='button'
+          onClick={handleDeleteStudyPlan}
+          className='cursor-pointer'
+        >
+          <Trash2Icon className='size-6 text-red-400' />
+        </button>
+       </div>
       </div>
 
       <div className='mt-3 flex flex-col gap-4'>
@@ -290,6 +373,106 @@ const Card = (s) => {
                   </div>
                 </form>
               </div>
+            </div>
+          </div>,
+          modalRoot
+        ) : null
+      }
+
+      {
+        editModalOpen && modalRoot ? createPortal(
+          <div
+            className='fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md'
+            onClick={closeEditModal}
+          >
+            <div
+              role='dialog'
+              aria-modal='true'
+              aria-labelledby={`study-edit-title-${s._id}`}
+              className='relative w-full max-w-xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 shadow-[0_30px_100px_rgba(0,0,0,0.6)]'
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className='border-b border-white/10 px-5 py-4'>
+                <div className='flex items-start justify-between gap-4'>
+                  <div>
+                    <div className='inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-200'>
+                      <EditIcon className='size-3.5' />
+                      <span>Edit study plan</span>
+                    </div>
+                    <h2 id={`study-edit-title-${s._id}`} className='mt-3 text-2xl font-semibold text-white'>
+                      Update subject details
+                    </h2>
+                    <p className='mt-1 text-sm text-white/60'>
+                      Change the subject name or target hours for this plan.
+                    </p>
+                  </div>
+
+                  <button
+                    type='button'
+                    onClick={closeEditModal}
+                    className='inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:bg-white/10'
+                    aria-label='Close edit modal'
+                  >
+                    <X className='size-4' />
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleEditStudyPlan} className='space-y-4 px-5 py-5'>
+                {editError && (
+                  <div className='rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100'>
+                    {editError}
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor={`edit-subject-${s._id}`} className='mb-2 block text-sm font-semibold text-white'>
+                    Subject name
+                  </label>
+                  <input
+                    id={`edit-subject-${s._id}`}
+                    type='text'
+                    value={editSubject}
+                    onChange={(e) => setEditSubject(e.target.value)}
+                    className='w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400/50 focus:bg-white/8 focus:ring-2 focus:ring-emerald-400/20'
+                    placeholder='Enter subject name'
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor={`edit-target-${s._id}`} className='mb-2 block text-sm font-semibold text-white'>
+                    Target hours
+                  </label>
+                  <input
+                    id={`edit-target-${s._id}`}
+                    type='number'
+                    min='0'
+                    step='0.25'
+                    value={editTargetHours}
+                    onChange={(e) => setEditTargetHours(e.target.value)}
+                    className='w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-white/30 focus:border-emerald-400/50 focus:bg-white/8 focus:ring-2 focus:ring-emerald-400/20'
+                    placeholder='Enter target hours'
+                  />
+                </div>
+
+                <div className='flex flex-col-reverse gap-3 border-t border-white/10 pt-5 sm:flex-row sm:justify-end'>
+                  <button
+                    type='button'
+                    onClick={closeEditModal}
+                    className='rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10'
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={!editSubject.trim() || Number(editTargetHours) <= 0 || isEditSubmitting}
+                    type='submit'
+                    className='inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50'
+                  >
+                    <BadgeCheck className='size-4' />
+                    {isEditSubmitting ? 'Saving...' : 'Save changes'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>,
           modalRoot

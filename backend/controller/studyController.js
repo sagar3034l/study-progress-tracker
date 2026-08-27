@@ -2,8 +2,9 @@ import StudyModel from "../model/StudyPlan.js";
 
 function buildAttributesForUpdate(body){
     const data = {}
-    if(body.Subject !== undefined) data.Subject = body.Subject;
-    if(body.category !== undefined) data.category = body.Subject;
+    if(body.subject !== undefined) data.subject = body.subject;
+    if(body.Subject !== undefined) data.subject = body.Subject;
+    if(body.category !== undefined) data.category = body.category;
     if(body.targetHours !== undefined) data.targetHours = body.targetHours;
     if(body.isCompleted !== undefined) data.isCompleted = body.isCompleted;
 
@@ -49,13 +50,23 @@ export async function updateStudySchema(req,res){
     try {
         const updatedData = buildAttributesForUpdate(req.body);
         const {id} = req.params;
+        const userId = req.user?._id;
         
         if(Object.keys(updatedData).length === 0){
             res.status(400).json({error:"No fields to update"})
             return;
         }
 
-        const updatedStudySchema = await StudyModel.findByIdAndUpdate(id, data,{ new: true });
+        const updatedStudySchema = await StudyModel.findOneAndUpdate(
+            { _id: id, plannedBy: userId },
+            updatedData,
+            { new: true, runValidators: true }
+        );
+
+        if(!updatedStudySchema){
+            res.status(404).json({error:"Study plan not found"})
+            return;
+        }
 
         res.json({
             updatedStudySchema,
@@ -89,14 +100,20 @@ export async function getAllStudyPlans(req,res){
 export async function deletePlan(req,res) {
     try {
         const {id} = req.params;
-        await StudyModel.findByIdAndDelete(id);
+        const userId = req.user?._id;
+        const deletedPlan = await StudyModel.findOneAndDelete({ _id: id, plannedBy: userId });
+
+        if(!deletedPlan){
+            res.status(404).json({error:"Study plan not found"})
+            return;
+        }
 
         res.json({
             success: true,
             message:"Shedule deleted"
         })
     } catch (e) {
-        console.error(error);
+        console.error(e);
         res.status(500).json({error: "Internal server error"})
     }
 }
