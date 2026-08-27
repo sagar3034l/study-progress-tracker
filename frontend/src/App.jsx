@@ -16,8 +16,7 @@ function App() {
   const location = useLocation()
   const protectedRoute = location.pathname === '/study' || location.pathname === '/studychart'
 
-
-  if (protectedRoute && !authReady) {
+  if (!authReady && (protectedRoute || location.pathname === '/')) {
     return <LoaderIcon className='animate-spin text-center relative top-[260px] left-[620px] size-24 text-amber-400' />
   }
 
