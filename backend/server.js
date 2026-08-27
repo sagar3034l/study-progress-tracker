@@ -7,16 +7,12 @@ import studyRoutes from './routes/studyPlanRoutes.js'
 import studyHistoryRoute from './routes/studyProgressHistroyRoute.js'
 import aiRoute from './routes/aiRoute.js'
 import path from 'path'
+import job from './lib/cron.js';
 import cors from 'cors'
 
 dotenv.config();
 
 const app = express();
-
-app.use(cors({
-     origin: "http://localhost:5173",
-     credentials: true
-}))
 
 app.use(cookieParser())
 
@@ -26,8 +22,10 @@ const __dirname = path.resolve();
 
 app.use(express.json());
 
-
-
+app.use(cors({
+     origin: "http://localhost:5173",
+     credentials: true
+}));
 
 await connectDB();
 
@@ -36,6 +34,7 @@ app.use("/api/user",userRoute)
 app.use('/api/study',studyRoutes)
 app.use('/api/subject',studyHistoryRoute)
 app.use('/api/ai', aiRoute)
+
 
 
 if(process.env.NODE_ENV === "production"){
@@ -48,6 +47,9 @@ if(process.env.NODE_ENV === "production"){
 
 app.listen(PORT,()=>{
      console.log("Server is started in port",PORT)
+     if(process.env.NODE_ENV === "production"){
+          job.start();
+     }
 })
 
 
